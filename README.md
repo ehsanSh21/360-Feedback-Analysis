@@ -104,6 +104,12 @@ The tables were designed with appropriate relationships and foreign key constrai
 }
 ```
 
+sample data:
+
+id | uuid                                 | type       | course_id | user_id | created_at           | updated_at           |
+---|--------------------------------------|------------|-----------|---------|----------------------|----------------------|
+12 | 0b59cb43-2496-45cb-9b66-b5ce62be3fc1 | assessment | NULL      | 1       | 2023-09-28 06:37:06  | 2023-09-28 06:37:06  |
+
 
 #### Table: form_groups
 ```json
@@ -137,6 +143,10 @@ The tables were designed with appropriate relationships and foreign key constrai
   ]
 }
 ```
+sample data:
+id | form_id | data                | created_at           | updated_at           |
+---|---------|---------------------|----------------------|----------------------|
+23 | 12      | '{"column":"4"}'    | 2023-09-28 06:37:06  | 2023-09-28 06:37:06  |
 
 
 #### Table: form_elements
@@ -188,6 +198,11 @@ The tables were designed with appropriate relationships and foreign key constrai
   ]
 }
 ```
+sample data: 
+id | uuid                                 | form_id | group_id | type   | ordering | created_at           | updated_at           |
+---|--------------------------------------|---------|----------|--------|----------|----------------------|----------------------|
+64 | 46e8b340-50c9-4a6e-9832-e9081bdcd44d | 12      | 23       | radio  | 3        | 2023-09-28 06:37:06  | 2023-09-28 06:37:06  |
+65 | de9f7e22-6798-4755-b21c-7d81eba36664 | 12      | 23       | radio  | 2        | 2023-09-28 06:37:06  | 2023-09-28 06:37:06  |
 
 
 #### Table: metas
@@ -224,6 +239,12 @@ The tables were designed with appropriate relationships and foreign key constrai
   ]
 }
 ```
+sample data: 
+id  | relatable_type          | relatable_id | key              | value  | is_json |
+----|-------------------------|--------------|------------------|--------|---------|
+335 | AppModelsFormElement    | 64           | ratio            | 4      | f       |
+625 | AppModelsFormGroup      | 23           | ratio            | 6      | f       |
+748 | AppModelsFormElement    | 64           | reverse_grading  | true   | f       |
 
 
 #### Table: relationships
@@ -256,6 +277,11 @@ The tables were designed with appropriate relationships and foreign key constrai
   ]
 }
 ```
+sample data:
+id | from_type          | from_id | to_type              | to_id |
+---|--------------------|---------|----------------------|-------|
+5  | AppModelsForm      | 12      | AppModelsDepartment  | 1     |
+6  | AppModelsForm      | 12      | AppModelsDepartment  | 2     |
 
 
 #### Table: members
@@ -297,6 +323,11 @@ The tables were designed with appropriate relationships and foreign key constrai
   ]
 }
 ```
+sample data: 
+id | memberable_type      | memberable_id | user_id | deleted_at           | created_at           | updated_at           |
+---|----------------------|---------------|---------|----------------------|----------------------|----------------------|
+3  | AppModelsDepartment  | 2             | 5       | 2023-10-26 07:45:45  | 2023-10-26 07:45:45  | 2023-10-26 07:45:45  |
+4  | AppModelsDepartment  | 1             | 1       | 2023-10-26 07:45:45  | 2023-10-26 07:45:45  | 2023-10-26 07:45:45  |
 
 #### Table: answers
 
@@ -343,4 +374,13 @@ The tables were designed with appropriate relationships and foreign key constrai
   ]
 }
 ```
+sample data: 
+id | uuid                                 | user_id | form_element_id | answer | evaluated_user_id | created_at           | updated_at           |
+---|--------------------------------------|---------|-----------------|--------|-------------------|----------------------|----------------------|
+75 | 587aeff1-ddef-4b7a-9dde-ddf65f2e143e | 4       | 65              | 5      | 5                 | 2023-10-03 10:59:42  | 2023-10-03 10:59:42  |
+66 | 0b3cdc3c-651a-498d-86f4-f32d44026d10 | 1       | 66              | 2      | 2                 | 2023-09-28 07:47:10  | 2023-10-01 12:24:42  |
+73 | 9b00b7cb-c0b9-4e8b-b5fd-19b02387aa26 | 3       | 66              | 5      | 2                 | 2023-09-28 10:54:36  | 2023-09-28 10:54:36  |
+92 | 7e9a8509-ccb6-4252-9453-5f208553e9b0 | 1       | 65              | 5      | 1                 | 2023-10-09 09:08:51  | 2023-10-09 09:08:51  |
+93 | 85dd8eb4-0aec-4cc7-b786-bc014bd0eea5 | 1       | 66              | 1      | 1                 | 2023-10-09 09:09:47  | 2023-10-09 09:09:47  |
+
 
