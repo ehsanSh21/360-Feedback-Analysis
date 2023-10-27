@@ -384,3 +384,129 @@ id | uuid                                 | user_id | form_element_id | answer |
 93 | 85dd8eb4-0aec-4cc7-b786-bc014bd0eea5 | 1       | 66              | 1      | 1                 | 2023-10-09 09:09:47  | 2023-10-09 09:09:47  |
 
 
+### SQL Queries:
+
+#### overall point for a specific element:
+  This query calculates the overall point for a specific user in relation to a specific element in a form. The range of rating considered is from 1 to 5. The query takes into account reverse grading if the corresponding meta value for the element is set to 'true' for reverse grading.
+
+  ```sql
+SELECT 
+    form_elements.*,
+    (CASE WHEN metas_reverse.`key` = 'reverse_grading' THEN (5) - (AVG(CAST(answers.answer AS DECIMAL))) + 1 ELSE (SUM(CAST(answers.answer AS DECIMAL)) / COUNT(*)) END) AS overall_point
+FROM form_elements
+JOIN answers ON form_elements.id = answers.form_element_id
+    AND answers.evaluated_user_id = 2
+JOIN metas ON form_elements.id = metas.relatable_id
+    AND metas.relatable_type = 'AppModelsFormElement'
+    AND metas.`key` = 'ratio'
+LEFT JOIN metas AS metas_reverse ON form_elements.id = metas_reverse.relatable_id
+    AND metas_reverse.relatable_type = 'AppModelsFormElement'
+    AND metas_reverse.`key` = 'reverse_grading'
+    AND metas_reverse.`value` = 'true'
+WHERE form_elements.id = 64
+GROUP BY 
+    form_elements.id,
+    answers.evaluated_user_id,
+    metas_reverse.`key`;
+```
+
+#### percent rank for a specific element:
+This query calculates the overall point and percent rank for a specific user in relation to a specific element in a form.
+
+```sql
+SELECT 
+    form_elements.*,
+    answers.evaluated_user_id,
+    (CASE WHEN metas_reverse.`key` = 'reverse_grading' THEN (5) - (AVG(CAST(answers.answer AS DECIMAL))) + 1 ELSE (SUM(CAST(answers.answer AS DECIMAL)) / COUNT(*)) END) AS overall_point,
+    CASE
+    WHEN metas_reverse.key = 'reverse_grading' THEN
+        (PERCENT_RANK() OVER (ORDER BY ((5) - (AVG(answers.answer)) + 1) * 100))
+    ELSE
+        (PERCENT_RANK() OVER (ORDER BY (SUM(answers.answer) / COUNT(*)))) * 100
+END AS PercentRank
+FROM
+    form_elements
+JOIN
+    answers ON form_elements.id = answers.form_element_id
+JOIN
+    metas ON form_elements.id = metas.relatable_id
+    
+    LEFT JOIN metas AS metas_reverse ON form_elements.id = metas_reverse.relatable_id
+    AND metas_reverse.relatable_type = 'AppModelsFormElement'
+    AND metas_reverse.`key` = 'reverse_grading'
+    AND metas_reverse.`value` = 'true'
+WHERE
+    metas.relatable_type = 'AppModelsFormElement'
+    AND metas.key = 'ratio'
+    AND form_elements.id = 64
+GROUP BY
+    form_elements.id,
+    answers.evaluated_user_id;
+```
+
+#### overall point for a specific group:
+This SQL query utilizes a subquery to calculate the overall point for a group of elements, considering their individual ratios and reverse grading settings. The subquery performs intricate calculations, taking into account the metas values for each element. The outer query then computes the total_sum_result for the group based on the subquery results.
+
+```sql
+SELECT 
+    subquery.group_id,
+    SUM(subquery.sum_result) / SUM(subquery.ratios) AS total_sum_result
+FROM
+    (SELECT 
+        form_groups.id AS group_id,
+        form_elements.id,
+        (CASE 
+            WHEN metas_reverse.key = 'reverse_grading' THEN ((5) - (AVG(answers.answer)) + 1) * (SELECT metas.value FROM metas WHERE metas.relatable_id = form_elements.id AND metas.relatable_type = 'AppModelsFormElement' AND metas.key = 'ratio')
+            ELSE (SUM(answers.answer) / COUNT(*)) * (SELECT metas.value FROM metas WHERE metas.relatable_id = form_elements.id AND metas.relatable_type = 'AppModelsFormElement' AND metas.key = 'ratio')
+        END) AS sum_result,
+        (CASE 
+            WHEN metas_reverse.key = 'reverse_grading' THEN (SELECT metas.value FROM metas WHERE metas.relatable_id = form_elements.id AND metas.relatable_type = 'AppModelsFormElement' AND metas.key = 'ratio')
+            ELSE (SELECT metas.value FROM metas WHERE metas.relatable_id = form_elements.id AND metas.relatable_type = 'AppModelsFormElement' AND metas.key = 'ratio')
+        END) AS ratios
+    FROM 
+        form_groups
+    JOIN 
+        form_elements ON form_groups.id = form_elements.group_id
+    JOIN 
+        answers ON form_elements.id = answers.form_element_id
+    JOIN 
+        metas ON form_elements.id = metas.relatable_id AND metas.relatable_type = 'AppModelsFormElement' AND metas.key = 'ratio'
+    LEFT JOIN 
+        metas AS metas_reverse ON form_elements.id = metas_reverse.relatable_id AND metas_reverse.relatable_type = 'AppModelsFormElement' AND metas_reverse.key = 'reverse_grading' AND metas_reverse.value = 'true'
+    WHERE 
+        answers.evaluated_user_id = 2
+        AND form_groups.id = 23
+    GROUP BY 
+        form_groups.id,
+        metas_reverse.key,
+        form_elements.id) AS subquery
+GROUP BY 
+    subquery.group_id;
+```
+
+#### participation percentage:
+This query calculates the participation percentage of individuals in a department who answered a specific form assigned to their department.
+
+```sql
+SELECT 
+    COUNT(DISTINCT members.user_id) AS member_count,
+    COUNT(DISTINCT member_dep.user_id) AS departmet_members_count,
+    (COUNT(DISTINCT members.user_id) * 100) / NULLIF(COUNT(DISTINCT member_dep.user_id), 0) AS Participation_percentage
+FROM forms
+JOIN form_elements ON forms.id = form_elements.form_id
+JOIN answers ON form_elements.id = answers.form_element_id
+LEFT JOIN relationships ON forms.id = relationships.from_id AND relationships.from_type = 'AppModelsForm' AND relationships.to_id = 2 AND relationships.to_type = 'AppModelsDepartment'
+LEFT JOIN members AS member_dep ON relationships.to_id = member_dep.memberable_id AND member_dep.memberable_type = 'AppModelsDepartment'
+LEFT JOIN members ON answers.evaluated_user_id = members.user_id AND members.memberable_type = 'AppModelsDepartment' AND members.memberable_id = 2
+WHERE forms.id = 12 AND answers.evaluated_user_id IS NOT NULL
+GROUP BY forms.id;
+```
+
+
+
+
+
+
+
+
+
