@@ -502,6 +502,12 @@ WHERE forms.id = 12 AND answers.evaluated_user_id IS NOT NULL
 GROUP BY forms.id;
 ```
 
+### Database Schema:
+
+
+![alt text](https://github.com/ehsanSh21/360-Feedback-Analysis/blob/main/360_degree_feedback.svg)
+
+
 
 
 
