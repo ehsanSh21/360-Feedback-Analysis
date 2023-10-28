@@ -1,10 +1,18 @@
 # 360-Feedback-Analysis
 360-Degree Feedback Analysis with MySQL
 
+## Table of Contents
+
+- [Project Overview](#project-overview)
+- [Data Description](#data-description)
+- [SQL Queries](#sql-queries)
+
+
+<a name="project-overview"></a>
 ### Project Overview:
 The 360 degree feedback result project aimed to analyze feedback collected from participants within the organization. By aggregating and analyzing the feedback, the project provided insights into individual performance, identifying strengths and areas for improvement. The project utilized a relational database to store the feedback data and employed SQL queries to calculate metrics and results. Overall, the project showcased a strong understanding of data analysis, database management, and the ability to derive meaningful insights from complex datasets.
 
-
+<a name="data-description"></a>
 ### Data Description:
 The project utilized a relational database to store the feedback data. The database consisted of several tables, including the "users" table for storing information about the individuals, the "forms" table for defining the evaluation forms, the "form_groups" table for grouping related form elements, the "form_elements" table for capturing the specific evaluation criteria, and the "answers" table for storing the feedback responses.
 
@@ -383,7 +391,7 @@ id | uuid                                 | user_id | form_element_id | answer |
 92 | 7e9a8509-ccb6-4252-9453-5f208553e9b0 | 1       | 65              | 5      | 1                 | 2023-10-09 09:08:51  | 2023-10-09 09:08:51  |
 93 | 85dd8eb4-0aec-4cc7-b786-bc014bd0eea5 | 1       | 66              | 1      | 1                 | 2023-10-09 09:09:47  | 2023-10-09 09:09:47  |
 
-
+<a name="sql-queries"></a>
 ### SQL Queries:
 
 #### overall point for a specific element:
